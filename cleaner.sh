@@ -1,14 +1,10 @@
 #!/bin/bash
 
-#---------------------------------------
-# input arguments
-# $1 - Enable Debug mode: --Debug
-#---------------------------------------
-
 schedulerLogsDir="/logs/scheduler"
 dagProcessorManagerLogsDir="/logs/dag_processor_manager"
+#dagProcessorManagerLogsDir="/var/log/mysql"
 
-fileLog="/var/log/cleaner_info.log"
+fileLog="/home/galex/projects/cleaner/info.log"
 isDebug=0
 olderThan="+31"
 
@@ -18,7 +14,7 @@ if [ -n "$1" ]
 then
     if [ "$1" = "--Debug" ]
     then
-        echo "Debug mode is enabled." >> $fileLog
+        echo "Debug mode enabled." >> $fileLog
         isDebug=1
     else
         echo "Unknown argument." >> $fileLog
@@ -29,7 +25,7 @@ fi
 if ! [ "$( id -u )" = 0 ]
 then
   echo -e "This script must run with the Root privileges!\nThe script terminated.\n$(date +%Y-%m-%d-%H-%M-%S) End cleaning\n"  >> $fileLog
-  exit 1
+  #exit 1
 else
     echo "The script runs with the Root privileges." >> $fileLog
 fi
@@ -69,7 +65,12 @@ removeByNamePattern () {
     echo "Removed Month: $removedMonth" >> $fileLog
   fi
   #create pattern
-  pattern=$(printf "%d-%.2d-*" "$removedYear" "$removedMonth")
+  pattern=$(printf "%d-%.2d-*" "$removedYear" "$removedMonth" >> $fileLog 2>&1)
+  if [ -z "$pattern" ]
+  then
+    echo -e "Wrong pattern. The script terminated.\n$(date +%Y-%m-%d-%H-%M-%S) End cleaning\n"  >> $fileLog
+    exit 1
+  fi
   if [ "$isDebug" -eq 1 ]
   then
     echo "The pattern for deleted directories: $pattern" >> $fileLog
