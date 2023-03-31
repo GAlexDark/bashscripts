@@ -18,7 +18,7 @@ if [ -n "$1" ]
 then
     if [ "$1" = "--Debug" ]
     then
-        echo "Debug mode enabled." >> $fileLog
+        echo "Debug mode is enabled." >> $fileLog
         isDebug=1
     else
         echo "Unknown argument." >> $fileLog
@@ -78,16 +78,16 @@ removeByNamePattern () {
   find "$schedulerLogsDir" -maxdepth 1 -type d -iname "$pattern" -exec rm -rf {} \; >> $fileLog 2>&1
 }
 #----------------------------------------------------------------------------
-#{
+# {
 #  echo "Remove scheduler logs in their folders older than $olderThan days"
 #  find "$schedulerLogsDir" -maxdepth 1 -type d -mtime "$olderThan" -exec rm -rf {} \;
-#} >> $fileLog 2>&1
-echo "Remove scheduler logs in their folders for pattern.">> $fileLog 2>&1
+# } >> $fileLog 2>&1
+echo "Remove scheduler logs in their folders for pattern." >> $fileLog 2>&1
 removeByNamePattern
 #----------------------------------------------------------------------------
 {
   echo "Remove DAG Processor manager log files"
-  find "$dagProcessorManagerLogsDir" -type f -mtime "$olderThan" -exec rm -rf {} \;
+  find "$dagProcessorManagerLogsDir" -type f -iname '*.log.*' -mtime "$olderThan" -exec rm -rf {} \;
 } >> $fileLog 2>&1
 #----------------------------------------------------------------------------
 echo -e "$(date +%Y-%m-%d-%H-%M-%S) End cleaning\n" >> $fileLog
