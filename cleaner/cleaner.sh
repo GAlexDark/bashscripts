@@ -4,7 +4,7 @@ schedulerLogsDir="/logs/scheduler"
 dagProcessorManagerLogsDir="/logs/dag_processor_manager"
 #dagProcessorManagerLogsDir="/var/log/mysql"
 
-fileLog="/home/galex/projects/cleaner/info.log"
+fileLog="/home/galex/projects/bashscripts/cleaner/info.log"
 isDebug=0
 olderThan="+31"
 
