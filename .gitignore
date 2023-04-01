@@ -6,11 +6,11 @@ node_modules
 # Generated files
 .psci
 output
-.log
-.txt
-.db
-.old
-.bak
-.bakup
-.conf
-.cnf
+*.log
+*.txt
+*.db
+*.old
+*.bak
+*.backup
+*.conf
+*.cnf
