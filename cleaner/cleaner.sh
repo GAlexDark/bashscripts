@@ -4,7 +4,7 @@ schedulerLogsDir="/logs/scheduler"
 dagProcessorManagerLogsDir="/logs/dag_processor_manager"
 #dagProcessorManagerLogsDir="/var/log/mysql"
 
-fileLog="/home/galex/projects/cleaner/info.log"
+fileLog="/home/galex/projects/bashscripts/cleaner/info.log"
 isDebug=0
 olderThan="+31"
 
@@ -33,39 +33,10 @@ fi
 #----------------------------------------------------------------------------
 # Remove scheduler logs in their folders for pattern
 removeByNamePattern () {
-  local december
-  december=12
-  local january
-  january=1
-  local currentYear
-  currentYear="$(date +%Y)"
-  local currentMonth
-  currentMonth="$(date +%m)"
   local pattern
-  local removedYear
-  local removedMonth
 
-  if [ "$isDebug" -eq 1 ]
-  then
-    echo "Current year: $currentYear" >> $fileLog
-    echo "Current month: $currentMonth" >> $fileLog
-  fi
-
-  if [ "$currentMonth" -eq "$january" ]
-  then
-    removedYear=$(( currentYear-1 ))
-    removedMonth=$december
-  else
-    removedYear="$currentYear"
-    removedMonth=$(( currentMonth-1 ))
-  fi
-  if [ "$isDebug" -eq 1 ]
-  then
-    echo "Removed Year: $removedYear" >> $fileLog
-    echo "Removed Month: $removedMonth" >> $fileLog
-  fi
   #create pattern
-  pattern=$(printf "%d-%.2d-*" "$removedYear" "$removedMonth" >> $fileLog 2>&1)
+  pattern=$(date --date="1 month ago" +"%Y-%m-*")
   if [ -z "$pattern" ]
   then
     echo -e "Wrong pattern. The script terminated.\n$(date +%Y-%m-%d-%H-%M-%S) End cleaning\n"  >> $fileLog
