@@ -1,33 +1,35 @@
 #!/bin/bash
 
 schedulerLogsDir="/logs/scheduler"
-dagProcessorManagerLogsDir="/logs/dag_processor_manager"
-#dagProcessorManagerLogsDir="/var/log/mysql"
+#dagProcessorManagerLogsDir="/logs/dag_processor_manager"
+dagProcessorManagerLogsDir="/var/log/nginx"
 
 fileLog="/var/log/cleaner_info.log"
 isDebug=0
 olderThan="+31"
 
-echo "$(date +%Y-%m-%d-%H-%M-%S) Start cleaning" >> "$fileLog"
+startTimeStamp="$(date +%Y-%m-%d-%H-%M-%S) Start cleaning"
+
+echo "$startTimeStamp" >> "$fileLog"
 
 if [ -n "$1" ]
 then
-    if [ "$1" = "--Debug" ]
-    then
-        echo "Debug mode enabled." >> "$fileLog"
-        isDebug=1
-    else
-        echo "Unknown argument." >> "$fileLog"
-    fi
+  if [ "$1" = "--Debug" ]
+  then
+    echo "Debug mode enabled." >> "$fileLog"
+    isDebug=1
+  else
+    echo "Unknown argument." >> "$fileLog"
+  fi
 fi
 
 # ref: https://askubuntu.com/a/30157/8698
 if ! [ "$( id -u )" = 0 ]
 then
   echo -e "This script must run with the Root privileges!\nThe script terminated.\n$(date +%Y-%m-%d-%H-%M-%S) End cleaning\n"  >> "$fileLog"
-  #exit 1
+  exit 1
 else
-    echo "The script runs with the Root privileges." >> "$fileLog"
+  echo "The script runs with the Root privileges." >> "$fileLog"
 fi
 
 #----------------------------------------------------------------------------
@@ -44,23 +46,29 @@ removeByNamePattern () {
   fi
   if [ "$isDebug" -eq 1 ]
   then
-    echo "The pattern for deleted directories: $pattern" >> "$fileLog"
+    {
+      echo "The pattern for deleted directories: $pattern"
+      echo "The directories to be deleted:"
+      find "$schedulerLogsDir" -maxdepth 1 -type d -iname "$pattern" -print
+    }  >> "$fileLog" 2>&1
   fi
   #remove files and directories from pattern
   find "$schedulerLogsDir" -maxdepth 1 -type d -iname "$pattern" -exec rm -rf {} \; >> "$fileLog" 2>&1
 }
 #----------------------------------------------------------------------------
-# {
-#  echo "Remove scheduler logs in their folders older than $olderThan days"
-#  find "$schedulerLogsDir" -maxdepth 1 -type d -mtime "$olderThan" -exec rm -rf {} \;
-# } >> $fileLog 2>&1
-echo "Remove scheduler logs in their folders for pattern." >> "$fileLog"
+echo "Delete scheduler logs in their folders for pattern." >> "$fileLog"
 removeByNamePattern
 #----------------------------------------------------------------------------
 {
-  echo "Remove DAG Processor manager log files"
-  find "$dagProcessorManagerLogsDir" -type f -iname '*.log.*' -mtime "$olderThan" -exec rm -rf {} \;
+  echo "Delete DAG Processor manager log files."
+  if [ "$isDebug" -eq 1 ]
+  then
+    echo "The files to be deleted:"
+    find "$dagProcessorManagerLogsDir" -type f -iname '*.log.*' -mtime "$olderThan" -print
+  fi
+  find "$dagProcessorManagerLogsDir" -type f -iname '*.log.*' -ctime "$olderThan" -exec rm -f {} \;
 } >> "$fileLog" 2>&1
 #----------------------------------------------------------------------------
-echo -e "$(date +%Y-%m-%d-%H-%M-%S) End cleaning\n" >> "$fileLog"
+endTimeStamp="$(date +%Y-%m-%d-%H-%M-%S) End cleaning\n"
+echo "$endTimeStamp" >> "$fileLog"
 exit 0
