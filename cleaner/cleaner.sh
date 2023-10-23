@@ -66,8 +66,9 @@ removeByNamePattern
     echo "The files to be deleted:"
     find "$dagProcessorManagerLogsDir" -type f -iname '*.log.*' -mtime "$olderThan" -print
   fi
-  find "$dagProcessorManagerLogsDir" -type f -iname '*.log.*' -ctime "$olderThan" -exec rm -f {} \;
+  find "$dagProcessorManagerLogsDir" -type f -iname '*.log.*' -mtime "$olderThan" -exec rm -f {} \;
 } >> "$fileLog" 2>&1
+# mtime - modify, atime - access, ctime -birth (can be empty)
 #----------------------------------------------------------------------------
 endTimeStamp="$(date +%Y-%m-%d-%H-%M-%S) End cleaning\n"
 echo "$endTimeStamp" >> "$fileLog"
