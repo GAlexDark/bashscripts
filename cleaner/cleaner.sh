@@ -26,7 +26,7 @@ fi
 # ref: https://askubuntu.com/a/30157/8698
 if ! [ "$( id -u )" = 0 ]
 then
-  echo -e "This script must run with the Root privileges!\nThe script terminated.\n$(date +%Y-%m-%d-%H-%M-%S) End cleaning\n"  >> "$fileLog"
+  echo -e "This script must run with the Root privileges!\nThe script terminated.\n$(date +%Y-%m-%d-%H-%M-%S) End cleaning\n"
   exit 1
 else
   echo "The script runs with the Root privileges." >> "$fileLog"
