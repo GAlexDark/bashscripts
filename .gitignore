@@ -1,7 +1,7 @@
 # Dependencies
 
 # Generated files
-.*.log
+*.log
 *.txt
 *.db
 *.old
