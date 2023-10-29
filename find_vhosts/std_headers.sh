@@ -1,0 +1,15 @@
+#!/bin/bash
+
+header_accept="Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"
+header_accept_language="Accept-Language: ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3"
+header_accept_encoding="Accept-Encoding: gzip, deflate, br"
+header_dnt="DNT: 1"
+header_connection="Connection: keep-alive"
+header_upgrade_insecure_requests="Upgrade-Insecure-Requests: 1"
+header_sec_fetch_dest="Sec-Fetch-Dest: document"
+header_sec_fetch_mode="Sec-Fetch-Mode: navigate"
+header_sec_fetch_site="Sec-Fetch-Site: none"
+header_sec_fetch_user="Sec-Fetch-User: ?1"
+header_sec_gpc="Sec-GPC: 1"
+header_pragma="Pragma: no-cache"
+header_cache_control="Cache-Control: no-cache"
