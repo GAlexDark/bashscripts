@@ -18,7 +18,7 @@ case $rnd in
   ;;
   3) echo "https://search.yahoo.com/"
   ;;
-  4) echo "https://www.baidu.com/link?url=-TN5QnU0-G8uENDWPNC2NsO_0lwSWAPl4nJvpyV6D7KUAnjB-PazSweqcuptRjIVOs7CZ_U4rfeFzVlB_nfIrf7eAUhNyQy0Bn7PYelm-6y&wd=&eqid=95549483000df9870000007"
+  4) echo "https://www.baidu.com/link?url="
   ;;
   5) echo "https://www.qwant.com/"
   ;;
