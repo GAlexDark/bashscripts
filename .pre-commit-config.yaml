@@ -24,13 +24,13 @@ repos:
 #    hooks:
 #      - id: beautysh
 #
-  - repo: https://github.com/gruntwork-io/pre-commit
-    rev: v0.1.23
-    hooks:
-      # This requires shellcheck to be installed manually so is disabled by default
-      - id: shellcheck
-        stages:
-          - manual
+#  - repo: https://github.com/gruntwork-io/pre-commit
+#    rev: v0.1.23
+#    hooks:
+#      # This requires shellcheck to be installed manually so is disabled by default
+#      - id: shellcheck
+#        stages:
+#          - manual
 
   - repo: meta
     hooks:
