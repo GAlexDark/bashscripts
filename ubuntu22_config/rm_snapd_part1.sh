@@ -11,7 +11,8 @@ fi
 # Checking the Ubuntu version
 OSreleaseFile="/etc/os-release"
 if [ -f "$OSreleaseFile" ]; then
-  . $OSreleaseFile
+  # shellcheck source=/dev/null
+  . "$OSreleaseFile"
   if [ "$ID" = "ubuntu" ] && [ "$(echo "$VERSION_ID" | cut -d. -f1)" -ge 22 ]; then
     echo "You are using Ubuntu $VERSION_ID. Continue executing the script."
   else

@@ -11,7 +11,8 @@ fi
 echo "Checking the Ubuntu version"
 OSreleaseFile="/etc/os-release"
 if [ -f "$OSreleaseFile" ]; then
-  . $OSreleaseFile
+  # shellcheck source=/dev/null
+  . "$OSreleaseFile"
   if [ "$ID" = "ubuntu" ] && [ "$(echo "$VERSION_ID" | cut -d. -f1)" -ge 22 ]; then
     echo "You are using Ubuntu $VERSION_ID. Continue executing the script."
   else
@@ -41,7 +42,8 @@ if [ -f "$grubFile" ]; then
     echo "Failed to create backup file"
     exit 1
   fi
-  . $grubFile
+  # shellcheck source=/dev/null
+  . "$grubFile"
   gcllValue=$GRUB_CMDLINE_LINUX
   gcllValue+=" netcfg\/do_not_use_netplan=true "
   gcll="GRUB_CMDLINE_LINUX="\"$gcllValue\"

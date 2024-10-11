@@ -11,7 +11,8 @@ fi
 # Checking the Ubuntu version
 OSreleaseFile="/etc/os-release"
 if [ -f "$OSreleaseFile" ]; then
-  . $OSreleaseFile
+  # shellcheck source=/dev/null
+  . "$OSreleaseFile"
   if [ "$ID" = "ubuntu" ] && [ "$(echo "$VERSION_ID" | cut -d. -f1)" -ge 22 ]; then
     echo "You are using Ubuntu $VERSION_ID. Continue executing the script."
   else
@@ -23,21 +24,26 @@ else
   exit 1
 fi
 
-apt update && apt install -y apt-utils dialog
+export DEBIAN_FRONTEND=noninteractive
+apt update #&& apt install -y apt-utils dialog
 ret=$?
 if [ $ret -ne 0 ] && [ $ret -ne 100 ]; then
   echo "Failed to install apt-utils or dialog. Please install manually and run the script again."
   exit 1
 fi
-apt upgrade -y
-ret=$?
-if [ $ret -ne 0 ]; then
+#apt upgrade -y
+#ret=$?
+#if [ $ret -ne 0 ]; then
+if ! apt upgrade -y
+then
   echo "Failed to upgrade packeges. Please upgrade manually and run the script again."
   exit 1
 fi
-apt install -y build-essential linux-headers-"$(uname -r)" eject iputils-ping bind9-dnsutils mc fdisk rng-tools-debian
-ret=$?
-if [ $ret -ne 0 ] && [ $ret -ne 100 ]; then
+#apt install -y build-essential linux-headers-"$(uname -r)" eject iputils-ping bind9-dnsutils mc fdisk rng-tools-debian
+#ret=$?
+#if [ $ret -ne 0 ] && [ $ret -ne 100 ]; then
+if ! apt install -y build-essential linux-headers-"$(uname -r)" eject iputils-ping bind9-dnsutils mc fdisk rng-tools-debian
+then
   echo "Failed to install basic packeges. Please install manually and run the script again."
   exit 1
 fi

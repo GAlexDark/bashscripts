@@ -19,7 +19,8 @@ fi
 # Checking the Ubuntu version
 OSreleaseFile="/etc/os-release"
 if [ -f "$OSreleaseFile" ]; then
-  . $OSreleaseFile
+  # shellcheck source=/dev/null
+  . "$OSreleaseFile"
   if [ "$ID" = "ubuntu" ] && [ "$(echo "$VERSION_ID" | cut -d. -f1)" -ge 22 ]; then
     echo "You are using Ubuntu $VERSION_ID. Continue executing the script."
   else
@@ -34,52 +35,46 @@ fi
 sshConfig="/etc/ssh/sshd_config"
 sshConfigBak=$sshConfig".bak"
 if [ -f "$sshConfig" ]; then
-  cp -f $sshConfig $sshConfigBak
-  ret=$?
-  if [ $ret -ne 0 ]; then
+  #cp -f $sshConfig $sshConfigBak
+  #ret=$?
+  #if [ $ret -ne 0 ]; then
+  if ! cp -f $sshConfig $sshConfigBak
+  then
     echo "Failed to create backup file"
     exit 1
   fi
-  sed -i "s/^X11Forwarding.*/X11Forwarding no/" $sshConfig
-  ret=$?
-  if [ $ret -ne 0 ]; then
+  #sed -i "s/^X11Forwarding.*/X11Forwarding no/" $sshConfig
+  #ret=$?
+  #if [ $ret -ne 0 ]; then
+  if ! sed -i "s/^X11Forwarding.*/X11Forwarding no/" $sshConfig
+  then
     echo "Failed to change $sshConfig settings."
-    cp -f $sshConfigBak $sshConfig
-    ret=$?
-    if [ $ret -ne 0 ]; then
+    #cp -f $sshConfigBak $sshConfig
+    #ret=$?
+    #if [ $ret -ne 0 ]; then
+    if ! cp -f $sshConfigBak $sshConfig
+    then
       echo "Failed to restore backup file"
       exit 1
     fi
     exit 1
   fi
-  sed -i "/^Subsystem/s/^/#/" $sshConfig
-  ret=$?
-  if [ $ret -ne 0 ]; then
+  #sed -i "/^Subsystem/s/^/#/" $sshConfig
+  #ret=$?
+  #if [ $ret -ne 0 ]; then
+  if ! sed -i "/^Subsystem/s/^/#/" $sshConfig
+  then
     echo "Failed to change $sshConfig settings."
-    cp -f $sshConfigBak $sshConfig
-    ret=$?
-    if [ $ret -ne 0 ]; then
+    #cp -f $sshConfigBak $sshConfig
+    #ret=$?
+    #if [ $ret -ne 0 ]; then
+    if ! cp -f $sshConfigBak $sshConfig
+    then
       echo "Failed to restore backup file"
       exit 1
     fi
     exit 1
   fi
-  sed -i 's/^\#HostKey \/etc\/ssh\/ssh_host_\(rsa\|ed25519\)_key$/HostKey \/etc\/ssh\/ssh_host_\1_key/g' $sshConfig
-  ret=$?
-  if [ $ret -ne 0 ]; then
-    echo "Failed to change $sshConfig settings."
-    cp -f $sshConfigBak $sshConfig
-    ret=$?
-    if [ $ret -ne 0 ]; then
-      echo "Failed to restore backup file"
-      exit 1
-    fi
-    exit 1
-  fi
-else
-    echo "Cannot access to the sshd_config file."
-    exit 1
-fi
 
 customSshd="/etc/ssh/sshd_config.d/sshd_hardening.conf"
 if [ -f "$customSshd" ]; then
@@ -92,6 +87,7 @@ allowGroup=""
 denyGroup=""
 if [ -f "$currentDir/$groups_file" ]; then
   echo "The sshd_groups file was found"
+  # shellcheck source=/dev/null
   . "$currentDir/$groups_file"
   if [ -n "$SSH_ALLOW_GROUP" ]; then
     allowGroup="AllowGroups "$SSH_ALLOW_GROUP
@@ -139,6 +135,7 @@ ${denyGroup}
 
 #Enable the RSA and ED25519 keys
 HostKey /etc/ssh/ssh_host_rsa_key
+#HostKey /etc/ssh/ssh_host_ecdsa_key
 HostKey /etc/ssh/ssh_host_ed25519_key
 
 # Restrict key exchange, cipher, and MAC algorithms, as per sshaudit.com
@@ -169,9 +166,11 @@ EOF
 
 if [ ! -f "$customSshd" ]; then
   echo -e "Error! The file sshd_hardening.conf wasn't created.\nRestoring $sshConfig file."
-  cp -f $sshConfigBak $sshConfig
-  ret=$?
-  if [ $ret -ne 0 ]; then
+  #cp -f $sshConfigBak $sshConfig
+  #ret=$?
+  #if [ $ret -ne 0 ]; then
+  if ! cp -f $sshConfigBak $sshConfig
+  then
     echo "Failed to restore backup file"
     exit 1
   fi
@@ -197,43 +196,55 @@ fi
 
 echo "Re-generate the RSA and ED25519 keys"
 rm -f "/etc/ssh/ssh_host_"*
-ssh-keygen -t rsa -b 4096 -f "/etc/ssh/ssh_host_rsa_key" -N ""
-ret=$?
-if [ $ret -ne 0 ]; then
+#ssh-keygen -t rsa -b 4096 -f "/etc/ssh/ssh_host_rsa_key" -N ""
+#ret=$?
+#if [ $ret -ne 0 ]; then
+if ! ssh-keygen -t rsa -b 4096 -f "/etc/ssh/ssh_host_rsa_key" -N ""
+then
   echo "Failed to execute ssh-keygen."
   exit 1
 fi
-ssh-keygen -t ed25519 -f "/etc/ssh/ssh_host_ed25519_key" -N ""
-ret=$?
-if [ $ret -ne 0 ]; then
+#ssh-keygen -t ed25519 -f "/etc/ssh/ssh_host_ed25519_key" -N ""
+#ret=$?
+#if [ $ret -ne 0 ]; then
+if ! ssh-keygen -t ed25519 -f "/etc/ssh/ssh_host_ed25519_key" -N ""
+then
   echo "Failed to execute ssh-keygen."
   exit 1
 fi
 
 echo "Remove small Diffie-Hellman moduli"
-cp -f "/etc/ssh/moduli" "$backupDir/"
-ret=$?
-if [ $ret -ne 0 ]; then
+#cp -f "/etc/ssh/moduli" "$backupDir/"
+#ret=$?
+#if [ $ret -ne 0 ]; then
+if ! cp -f "/etc/ssh/moduli" "$backupDir/"
+then
   echo "Failed to create backup"
   exit 1
 fi
 awk '$5 >= 3071' /etc/ssh/moduli > /etc/ssh/moduli.new
-mv /etc/ssh/moduli.new /etc/ssh/moduli
-ret=$?
-if [ $ret -ne 0 ]; then
+#mv /etc/ssh/moduli.new /etc/ssh/moduli
+#ret=$?
+#if [ $ret -ne 0 ]; then
+if ! mv /etc/ssh/moduli.new /etc/ssh/moduli
+then
   echo "Failed to create moduli file"
   exit 1
 fi
 
-chown root:root "$sshConfig" "$customSshd"
-ret=$?
-if [ $ret -ne 0 ]; then
+#chown root:root "$sshConfig" "$customSshd"
+#ret=$?
+#if [ $ret -ne 0 ]; then
+if ! chown root:root "$sshConfig" "$customSshd"
+then
   echo "Failed to execute chown."
   exit 1
 fi
-chmod og-rwx "$sshConfig" "$customSshd"
- ret=$?
-if [ $ret -ne 0 ]; then
+#chmod og-rwx "$sshConfig" "$customSshd"
+#ret=$?
+#if [ $ret -ne 0 ]; then
+if ! chmod og-rwx "$sshConfig" "$customSshd"
+then
   echo "Failed to execute chmod."
   exit 1
 fi

@@ -11,7 +11,8 @@ fi
 # Checking the Ubuntu version
 OSreleaseFile="/etc/os-release"
 if [ -f "$OSreleaseFile" ]; then
-  . $OSreleaseFile
+  # shellcheck source=/dev/null
+  . "$OSreleaseFile"
   if [ "$ID" = "ubuntu" ] && [ "$(echo "$VERSION_ID" | cut -d. -f1)" -ge 22 ]; then
     echo "You are using Ubuntu $VERSION_ID. Continue executing the script."
   else
@@ -47,6 +48,7 @@ curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/doc
 chmod a+r /etc/apt/keyrings/docker.asc
 
 echo "Add the repository to Apt sources:"
+# shellcheck source=/dev/null
 echo \
   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
   $(. "$OSreleaseFile" && echo "$VERSION_CODENAME") stable" | \
