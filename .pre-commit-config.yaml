@@ -18,12 +18,12 @@ repos:
       - id: trailing-whitespace
         exclude: \.(md|csv)$
 
-  # Autoformat: Bash scripts
-  - repo: https://github.com/lovesegfault/beautysh
-    rev: v6.2.1
-    hooks:
-      - id: beautysh
-
+#  # Autoformat: Bash scripts
+#  - repo: https://github.com/lovesegfault/beautysh
+#    rev: v6.2.1
+#    hooks:
+#      - id: beautysh
+#
   - repo: https://github.com/gruntwork-io/pre-commit
     rev: v0.1.23
     hooks:
