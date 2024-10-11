@@ -82,9 +82,6 @@ if [ -f "$currentDir/$groups_file" ]; then
   fi
 fi
 
-#ssh_config
-#ForwardX11Trusted no
-
 cat <<EOF >"$customSshd"
 Protocol 2
 Port 22
