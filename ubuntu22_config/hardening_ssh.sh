@@ -35,23 +35,14 @@ fi
 sshConfig="/etc/ssh/sshd_config"
 sshConfigBak=$sshConfig".bak"
 if [ -f "$sshConfig" ]; then
-  #cp -f $sshConfig $sshConfigBak
-  #ret=$?
-  #if [ $ret -ne 0 ]; then
   if ! cp -f $sshConfig $sshConfigBak
   then
     echo "Failed to create backup file"
     exit 1
   fi
-  #sed -i "s/^X11Forwarding.*/X11Forwarding no/" $sshConfig
-  #ret=$?
-  #if [ $ret -ne 0 ]; then
   if ! sed -i "s/^X11Forwarding.*/X11Forwarding no/" $sshConfig
   then
     echo "Failed to change $sshConfig settings."
-    #cp -f $sshConfigBak $sshConfig
-    #ret=$?
-    #if [ $ret -ne 0 ]; then
     if ! cp -f $sshConfigBak $sshConfig
     then
       echo "Failed to restore backup file"
@@ -59,15 +50,9 @@ if [ -f "$sshConfig" ]; then
     fi
     exit 1
   fi
-  #sed -i "/^Subsystem/s/^/#/" $sshConfig
-  #ret=$?
-  #if [ $ret -ne 0 ]; then
   if ! sed -i "/^Subsystem/s/^/#/" $sshConfig
   then
     echo "Failed to change $sshConfig settings."
-    #cp -f $sshConfigBak $sshConfig
-    #ret=$?
-    #if [ $ret -ne 0 ]; then
     if ! cp -f $sshConfigBak $sshConfig
     then
       echo "Failed to restore backup file"
@@ -75,7 +60,7 @@ if [ -f "$sshConfig" ]; then
     fi
     exit 1
   fi
-
+fi
 customSshd="/etc/ssh/sshd_config.d/sshd_hardening.conf"
 if [ -f "$customSshd" ]; then
   rm -f "$customSshd"
@@ -166,10 +151,7 @@ EOF
 
 if [ ! -f "$customSshd" ]; then
   echo -e "Error! The file sshd_hardening.conf wasn't created.\nRestoring $sshConfig file."
-  #cp -f $sshConfigBak $sshConfig
-  #ret=$?
-  #if [ $ret -ne 0 ]; then
-  if ! cp -f $sshConfigBak $sshConfig
+  if ! cp -f "$sshConfigBak" $sshConfig
   then
     echo "Failed to restore backup file"
     exit 1
@@ -196,17 +178,11 @@ fi
 
 echo "Re-generate the RSA and ED25519 keys"
 rm -f "/etc/ssh/ssh_host_"*
-#ssh-keygen -t rsa -b 4096 -f "/etc/ssh/ssh_host_rsa_key" -N ""
-#ret=$?
-#if [ $ret -ne 0 ]; then
 if ! ssh-keygen -t rsa -b 4096 -f "/etc/ssh/ssh_host_rsa_key" -N ""
 then
   echo "Failed to execute ssh-keygen."
   exit 1
 fi
-#ssh-keygen -t ed25519 -f "/etc/ssh/ssh_host_ed25519_key" -N ""
-#ret=$?
-#if [ $ret -ne 0 ]; then
 if ! ssh-keygen -t ed25519 -f "/etc/ssh/ssh_host_ed25519_key" -N ""
 then
   echo "Failed to execute ssh-keygen."
@@ -214,35 +190,23 @@ then
 fi
 
 echo "Remove small Diffie-Hellman moduli"
-#cp -f "/etc/ssh/moduli" "$backupDir/"
-#ret=$?
-#if [ $ret -ne 0 ]; then
 if ! cp -f "/etc/ssh/moduli" "$backupDir/"
 then
   echo "Failed to create backup"
   exit 1
 fi
 awk '$5 >= 3071' /etc/ssh/moduli > /etc/ssh/moduli.new
-#mv /etc/ssh/moduli.new /etc/ssh/moduli
-#ret=$?
-#if [ $ret -ne 0 ]; then
 if ! mv /etc/ssh/moduli.new /etc/ssh/moduli
 then
   echo "Failed to create moduli file"
   exit 1
 fi
 
-#chown root:root "$sshConfig" "$customSshd"
-#ret=$?
-#if [ $ret -ne 0 ]; then
 if ! chown root:root "$sshConfig" "$customSshd"
 then
   echo "Failed to execute chown."
   exit 1
 fi
-#chmod og-rwx "$sshConfig" "$customSshd"
-#ret=$?
-#if [ $ret -ne 0 ]; then
 if ! chmod og-rwx "$sshConfig" "$customSshd"
 then
   echo "Failed to execute chmod."
