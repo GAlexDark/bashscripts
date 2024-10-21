@@ -76,7 +76,7 @@ removeByDate() {
       rm -f "${item}" >> "$fileLog" 2>&1
     done
   else
-    echo "Nothing to remove."
+    echo "Nothing to remove." >> "$fileLog"
   fi
   unset fileNames
 }
