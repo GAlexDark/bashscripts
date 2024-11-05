@@ -3,7 +3,7 @@
 # Copyrigth (C) Oleksii Gaienko, 2024
 
 if [ "$#" -ne 1 ]; then
-  echo "The NTP IP-address not set."
+  echo "The NTP IP-address or domain name is not set."
   exit 1
 fi
 ntpIp=$1
@@ -62,31 +62,24 @@ fi
 echo "Uninstall NTP packages"
 apt-get remove --purge ntp ntpstat
 ret=$?
-#if [ $? -ne 0 -a $? -ne 100 ]; then
 if [ $ret -ne 0 ] && [ $ret -ne 100 ]; then
   echo "Failed to uninstall NTP packages. Please uninstall manually and run the script again."
   exit 1
 fi
 
 echo "Remove all unused packages"
-#apt-get autoremove -y
-#if [ $? -ne 0 ]; then
 if ! apt-get autoremove -y; then
   echo "Failed to autoremove unused packages. Please remove manually and run the script again."
   exit 1
 fi
 
 echo "Setup time zone"
-#timedatectl set-timezone Europe/Kyiv
-#if [ $? -ne 0 ]; then
 if ! timedatectl set-timezone Europe/Kyiv; then
   echo "Failed to set timezone. Please set timezone manually and run the script again."
   exit 1
 fi
 echo "Checking timezone"
 ls -lh /etc/localtime
-#timedatectl status
-#if [ $? -ne 0 ]; then
 if ! timedatectl status; then
   echo "Failed to exec timedatectl."
   exit 1
@@ -104,40 +97,30 @@ else
 fi
 
 echo "Activate systemd-timesyncd for time sync"
-#timedatectl set-ntp true
-#if [ $? -ne 0 ]; then
 if ! timedatectl set-ntp true; then
   echo "Failed to activate systemd-timesyncd. Please activate systemd-timesyncd manually and run the script again."
   exit 1
 fi
 
 echo "Enable systemd-timesyncd service"
-#systemctl enable --now systemd-timesyncd.service
-#if [ $? -ne 0 ]; then
 if ! systemctl enable --now systemd-timesyncd.service; then
   echo "Failed to enable systemd-timesyncd.service. Please enable systemd-timesyncd.service manually and run the script again."
   exit 1
 fi
 
 echo "Restart systemd-timesyncd service"
-#systemctl restart systemd-timesyncd.service
-#if [ $? -ne 0 ]; then
 if ! systemctl restart systemd-timesyncd.service; then
   echo "Failed to restart systemd-timesyncd.service. Please restart systemd-timesyncd.service manually and run the script again."
   exit 1
 fi
 
 echo "Checking systemd-timesyncd service status"
-#systemctl status systemd-timesyncd.service
-#if [ $? -ne 0 ]; then
 if ! systemctl status systemd-timesyncd.service; then
   echo "Failed to get systemd-timesyncd.service status. Please get systemd-timesyncd.service status manually and run the script again."
   exit 1
 fi
 
 echo "Checking timesyncd status"
-#timedatectl status
-#if [ $? -ne 0 ]; then
 if ! timedatectl status; then
   echo "Failed to exec timedatectl."
   exit 1

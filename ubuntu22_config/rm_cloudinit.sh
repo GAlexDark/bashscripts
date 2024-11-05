@@ -40,6 +40,6 @@ rm -rf /etc/cloud/
 rm -rf /var/lib/cloud/
 
 echo "Rebooting..."
-#shutdown -r now
+shutdown -r now
 
 exit 0

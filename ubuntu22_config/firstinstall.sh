@@ -25,23 +25,19 @@ else
 fi
 
 export DEBIAN_FRONTEND=noninteractive
-apt update #&& apt install -y apt-utils dialog
+apt update
 ret=$?
 if [ $ret -ne 0 ] && [ $ret -ne 100 ]; then
   echo "Failed to install apt-utils or dialog. Please install manually and run the script again."
   exit 1
 fi
-#apt upgrade -y
-#ret=$?
-#if [ $ret -ne 0 ]; then
+
 if ! apt upgrade -y
 then
   echo "Failed to upgrade packeges. Please upgrade manually and run the script again."
   exit 1
 fi
-#apt install -y build-essential linux-headers-"$(uname -r)" eject iputils-ping bind9-dnsutils mc fdisk rng-tools-debian
-#ret=$?
-#if [ $ret -ne 0 ] && [ $ret -ne 100 ]; then
+
 if ! apt install -y build-essential linux-headers-"$(uname -r)" eject iputils-ping bind9-dnsutils mc fdisk rng-tools-debian
 then
   echo "Failed to install basic packeges. Please install manually and run the script again."
