@@ -42,23 +42,35 @@ removeByNamePattern () {
     echo -e "Wrong pattern. The script terminated.\n$(date +%Y-%m-%d-%H-%M-%S) End cleaning\n"  >> "$fileLog"
     exit 1
   fi
-  if [ "$isDebug" -eq 1 ]
-  then
-    {
-      echo "The pattern for deleted directories: $pattern"
-      echo "The directories to be deleted:"
-      find "$schedulerLogsDir" -maxdepth 1 -type d -iname "$pattern" -print
-    }  >> "$fileLog" 2>&1
+
+  declare -a folders=()
+  while IFS='' read -r line; do folders+=("$line"); done < <(find "$schedulerLogsDir" -maxdepth 1 -type d -iname "$pattern")
+  if (( ${#folders[*]} > 0 )); then
+    if [ "$isDebug" -eq 1 ]
+    then
+      {
+        echo "The pattern for deleted directories: $pattern"
+        echo "The directories to be deleted:"
+        for item in "${folders[@]}"; do
+          echo "${item}"
+        done
+      } >> "$fileLog"
+    fi
+    for item in "${folders[@]}"; do
+      rm -rf "${item}" >> "$fileLog" 2>&1
+    done
+  else
+    echo "Nothing to remove." >> "$fileLog"
   fi
-  #remove files and directories from pattern
-  find "$schedulerLogsDir" -maxdepth 1 -type d -iname "$pattern" -exec rm -rf {} \; >> "$fileLog" 2>&1
+  unset folders
 }
+
 removeByDate() {  
-  declare -aI buf=()
+  declare -a buf=()
   while IFS='' read -r line; do buf+=("$line"); done < <(find "$dagProcessorManagerLogsDir" -type f -iname '*.log.*' -mtime "$olderThan")
   while IFS='' read -r line; do buf+=("$line"); done < <(find "$dagProcessorManagerLogsDir" -type f -iname '*.log.*' -atime "$olderThan")
 
-  declare -aI fileNames=()
+  declare -a fileNames=()
   while IFS='' read -r line; do fileNames+=("$line"); done < <(for item in "${buf[@]}"; do echo "${item}"; done | sort -u)
   unset buf
 
