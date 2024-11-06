@@ -9,11 +9,8 @@ fi
 ntpIp=$1
 if [[ $ntpIp =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
   echo "Checking IP-address"
-  OIFS=$IFS
-  IFS='.'
-  ip=("$ntpIp")
-  IFS=$OIFS
-  if [[ ${ip[0]} -le 255 && ${ip[1]} -le 255 && ${ip[2]} -le 255 && ${ip[3]} -le 255 ]]; then
+  IFS="." read -r -a arr <<< "$ntpIp"
+  if [[ ${arr[0]} -le 255 && ${arr[1]} -le 255 && ${arr[2]} -le 255 && ${arr[3]} -le 255 ]]; then
     echo "$ntpIp is correct IP-address"  
   else
     echo "$ntpIp is wrong IP-address"
@@ -24,8 +21,7 @@ else
   validate="^([a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]\.)+[a-zA-Z]{2,}$"
   if [[ "$ntpIp" =~ $validate ]]; then
     ip=$(dig +short "$ntpIp")
-    #if [ -n "$ip" ]; then
-    if [ ${#ip[@]} -ne 0 ]; then
+    if [ ${#ip} -ne 0 ]; then
       echo "$ntpIp is correct domain name"
     else
      echo "$ntpIp is incorrect domain name"
