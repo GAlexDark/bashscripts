@@ -2,6 +2,8 @@
 
 # Copyrigth (C) Oleksii Gaienko, 2024
 
+echo -e "This script must run in the console ONLY.\n"
+
 # Checking to run as root user
 if [ "$(id -u)" -ne 0 ]; then
   echo "This script must be run as the root user."
@@ -24,15 +26,7 @@ else
   exit 1
 fi
 
-echo "Installing packages"
-apt update && apt install -y ifupdown net-tools resolvconf
-ret=$?
-if [ $ret -ne 0 ]; then
-  echo "Failed to install ifupdown, net-tools and resolvconf. Please install manually and run the script again."
-  exit 1
-fi
-
-echo "Change GRUB settings"
+echo "Changing GRUB settings"
 grubFile="/etc/default/grub"
 grubBak=$grubFile".bak"
 if [ -f "$grubFile" ]; then
@@ -65,7 +59,7 @@ else
     exit 1
 fi
 
-echo "Update GRUB settings"
+echo "Updating GRUB settings"
 update-grub
 ret=$?
 if [ $ret -ne 0 ]; then
@@ -79,7 +73,15 @@ if [ $ret -ne 0 ]; then
   exit 1
 fi
 
-echo "Create interfaces list"
+echo "Installing packages"
+apt update && apt install -y ifupdown net-tools resolvconf
+ret=$?
+if [ $ret -ne 0 ]; then
+  echo "Failed to install ifupdown, net-tools and resolvconf. Please install manually and run the script again."
+  exit 1
+fi
+
+echo "Creating interfaces list"
 echo -e "# The loopback network interface\nauto lo\niface lo inet loopback" >> /etc/network/interfaces.d/loopback
 
 interfacesFile="/etc/network/interfaces"
