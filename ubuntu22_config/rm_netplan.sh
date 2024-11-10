@@ -94,6 +94,9 @@ for nic in "${niName[@]}"; do
   echo -e "\nauto ${nic}\niface ${nic} inet dhcp" >> $interfacesFile
 done
 
+echo "Remove link to the resolv.conf"
+unlink /etc/resolv.conf
+
 services=("systemd-networkd.socket" "systemd-networkd" "networkd-dispatcher" "systemd-networkd-wait-online" "systemd-resolved")
 echo "Stop netplan services"
 systemctl stop "${services[@]}"
@@ -119,9 +122,12 @@ fi
 echo "Remove netplan packages"
 apt --assume-yes purge nplan netplan.io
 ret=$?
-if [ $ret -ne 0 ]; then
+if [ $ret -ne 0 ] && [ $ret -ne 100 ]; then
   echo "Failed to remove netplan packages. Please remove manually and run the script again."
+  echo "Return code: $ret"
   exit 1
+else
+  echo "The netplan packages was removed"
 fi
 echo "Remove all unused packages"
 apt autoremove -y

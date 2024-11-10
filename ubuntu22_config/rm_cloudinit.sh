@@ -28,11 +28,15 @@ echo "Removing cloud-init"
 touch /etc/cloud/cloud-init.disabled
 export  DEBIAN_FRONTEND=noninteractive
 dpkg-reconfigure cloud-init
+dpkg-reconfigure cloud-init
 apt-get purge --assume-yes cloud-ini*
 ret=$?
 if [ $ret -ne 0 ] && [ $ret -ne 100 ]; then
   echo "Failed to uninstall cloud-init. Please uninstall manually and run the script again."
+  echo "Return code: $ret"
   exit 1
+else
+  echo "The cloud-init was removed"
 fi
 
 echo "Remove cloud-init files and folders"
