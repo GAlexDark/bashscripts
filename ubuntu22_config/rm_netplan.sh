@@ -2,11 +2,15 @@
 
 # Copyrigth (C) Oleksii Gaienko, 2024
 
-echo -e "This script must run in the console ONLY.\n"
-
 # Checking to run as root user
 if [ "$(id -u)" -ne 0 ]; then
   echo "This script must be run as the root user."
+  exit 1
+fi
+
+mode=${TERM}
+if [ "$mode" != "linux" ]; then
+  echo -e "This script must run in the console ONLY.\n"
   exit 1
 fi
 
