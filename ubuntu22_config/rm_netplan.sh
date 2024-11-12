@@ -43,10 +43,10 @@ if [ -f "$grubFile" ]; then
   # shellcheck source=/dev/null
   . "$grubFile"
   gcllValue=$GRUB_CMDLINE_LINUX
-  gcllValue+=" netcfg\/do_not_use_netplan=true "
+  gcllValue+=" netcfg/do_not_use_netplan=true "
   gcll="GRUB_CMDLINE_LINUX="\"$gcllValue\"
   echo "$gcll"
-  sed -i "s/^GRUB_CMDLINE_LINUX=.*/${gcll}/" $grubFile
+  sed -i "s|^GRUB_CMDLINE_LINUX=.*|${gcll}|" $grubFile
   ret=$?
   if [ $ret -ne 0 ]; then
     echo "Failed to change GRUB settings. Please change GRUB settings manually and run the script again."
