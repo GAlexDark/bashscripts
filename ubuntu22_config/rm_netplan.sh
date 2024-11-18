@@ -111,9 +111,9 @@ if [ ! -f "$interfacesFile" ]; then
   echo -e "The interfaces file creation\n"
   echo -e "# interfaces(5) file used by ifup(8) and ifdown(8)\n# Include files from /etc/network/interfaces.d:\nsource /etc/network/interfaces.d/*\n" >> $interfacesFile
 fi
-niName=$(ip -o -d link show | awk -F': ' '{print $2}' | grep '^enp')
-if [ ${#niName[@]} -ne 0 ]; then
-  for nic in "${niName[@]}"; do
+nicNames=$(ip -o -d link show | awk -F': ' '{print $2}' | grep '^enp')
+if [ ${#nicNames[@]} -ne 0 ]; then
+  for nic in "${nicNames[@]}"; do
     echo -e "\nauto ${nic}\niface ${nic} inet dhcp" >> $interfacesFile
   done
 else
