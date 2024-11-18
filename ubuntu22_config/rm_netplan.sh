@@ -43,37 +43,55 @@ if [ -f "$grubFile" ]; then
   # shellcheck source=/dev/null
   . "$grubFile"
   gcllValue=$GRUB_CMDLINE_LINUX
-  gcllValue+=" netcfg/do_not_use_netplan=true "
-  gcll="GRUB_CMDLINE_LINUX="\"$gcllValue\"
-  echo "$gcll"
-  sed -i "s|^GRUB_CMDLINE_LINUX=.*|${gcll}|" $grubFile
-  ret=$?
-  if [ $ret -ne 0 ]; then
-    echo "Failed to change GRUB settings. Please change GRUB settings manually and run the script again."
-    cp -f $grubBak $grubFile
+  regexp=".*do_not_use_netplan=((true|false)*)"
+  isChanged=true
+  if [[ "$gcllValue" =~ $regexp ]]; then
+    echo "Checking do_not_use_netplan value."
+    value=${BASH_REMATCH[1]}
+    if [ "$value" = "false" ]; then
+      echo "Changing do_not_use_netplan value."
+      sed -i "s|do_not_use_netplan=false|do_not_use_netplan=true|" $grubFile
+      ret=$?
+    else
+      isChanged=false
+      echo "Nothing to change in the GRUB file."
+    fi
+  else
+    echo "The do_not_use_netplan value is not exists"
+    gcllValue+=" netcfg/do_not_use_netplan=true "
+    gcll="GRUB_CMDLINE_LINUX="\"$gcllValue\"
+    echo "$gcll"
+    sed -i "s|^GRUB_CMDLINE_LINUX=.*|${gcll}|" $grubFile
     ret=$?
+  fi
+
+  if [ "$isChanged" = true ]; then
     if [ $ret -ne 0 ]; then
-      echo "Failed to restore backup file"
+      echo "Failed to change GRUB settings. Please change GRUB settings manually and run the script again."
+      cp -f $grubBak $grubFile
+      ret=$?
+      if [ $ret -ne 0 ]; then
+        echo "Failed to restore backup file"
+        exit 1
+      fi
       exit 1
     fi
-    exit 1
+    echo "Updating GRUB settings"
+    update-grub
+    ret=$?
+    if [ $ret -ne 0 ]; then
+      echo -e "Failed to update grub. Script restore backup file.\nPlease update grub manually and run the script again."
+      cp -f $grubBak $grubFile
+      ret=$?
+      if [ $ret -ne 0 ]; then
+        echo "Failed to restore backup file"
+        exit 1
+      fi
+      exit 1
+    fi
   fi
 else
-    echo "Cannot access to the GRUB file."
-    exit 1
-fi
-
-echo "Updating GRUB settings"
-update-grub
-ret=$?
-if [ $ret -ne 0 ]; then
-  echo "Failed to update grub. Please update grub manually and run the script again."
-  cp -f $grubBak $grubFile
-  ret=$?
-  if [ $ret -ne 0 ]; then
-    echo "Failed to restore backup file"
-    exit 1
-  fi
+  echo "Cannot access to the GRUB file."
   exit 1
 fi
 
@@ -94,9 +112,14 @@ if [ ! -f "$interfacesFile" ]; then
   echo -e "# interfaces(5) file used by ifup(8) and ifdown(8)\n# Include files from /etc/network/interfaces.d:\nsource /etc/network/interfaces.d/*\n" >> $interfacesFile
 fi
 niName=$(ls /sys/class/net | grep enp)
-for nic in "${niName[@]}"; do
-  echo -e "\nauto ${nic}\niface ${nic} inet dhcp" >> $interfacesFile
-done
+if [ ${#niName[@]} -ne 0 ]; then
+  for nic in "${niName[@]}"; do
+    echo -e "\nauto ${nic}\niface ${nic} inet dhcp" >> $interfacesFile
+  done
+else
+  echo "No interfaces found."
+  exit 1
+fi
 
 echo "Remove link to the resolv.conf"
 unlink /etc/resolv.conf
@@ -137,7 +160,7 @@ echo "Remove all unused packages"
 apt autoremove -y
 ret=$?
 if [ $ret -ne 0 ]; then
-  echo "Failed to remove netplan packages. Please remove manually and run the script again."
+  echo "Failed to remove all unused packages. Please remove manually and run the script again."
   exit 1
 fi
 
