@@ -43,7 +43,7 @@ if [ -f "$grubFile" ]; then
   # shellcheck source=/dev/null
   . "$grubFile"
   gcllValue=$GRUB_CMDLINE_LINUX
-  regexp=".*do_not_use_netplan=((true|false)*)"
+  regexp=".*do_not_use_netplan=((true|false)*).*"
   isChanged=true
   if [[ "$gcllValue" =~ $regexp ]]; then
     echo "Checking do_not_use_netplan value."

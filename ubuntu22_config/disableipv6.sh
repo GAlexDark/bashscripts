@@ -37,37 +37,55 @@ if [ -f "$grubFile" ]; then
   # shellcheck source=/dev/null
   . "$grubFile"
   gcllValue=$GRUB_CMDLINE_LINUX
-  gcllValue+=" ipv6.disable=1 "
-  gcll="GRUB_CMDLINE_LINUX="\"$gcllValue\"
-  echo "$gcll"
-  sed -i "s|^GRUB_CMDLINE_LINUX=.*|${gcll}|" $grubFile
-  ret=$?
-  if [ $ret -ne 0 ]; then
-    echo "Failed to change GRUB settings. Please change GRUB settings manually and run the script again."
-    cp -f $grubBak $grubFile
+  regexp=".*ipv6\.disable=((0|1)*).*"
+  isChanged=true
+  if [[ "$gcllValue" =~ $regexp ]]; then
+    echo "Checking ipv6.disable value."
+    value=${BASH_REMATCH[1]}
+    if [ "$value" = "0" ]; then
+      echo "Changing ipv6.disable value."
+      sed -i "s|ipv6.disable=0|ipv6.disable=1|" $grubFile
+      ret=$?
+    else
+      isChanged=false
+      echo "Nothing to change in the GRUB file."
+    fi
+  else
+    echo "The ipv6.disable is not exists"
+    gcllValue+=" ipv6.disable=1 "
+    gcll="GRUB_CMDLINE_LINUX="\"$gcllValue\"
+    echo "$gcll"
+    sed -i "s|^GRUB_CMDLINE_LINUX=.*|${gcll}|" $grubFile
     ret=$?
+  fi
+
+  if [ "$isChanged" = true ]; then
     if [ $ret -ne 0 ]; then
-      echo "Failed to restore backup file"
+      echo "Failed to change GRUB settings. Please change GRUB settings manually and run the script again."
+      cp -f $grubBak $grubFile
+      ret=$?
+      if [ $ret -ne 0 ]; then
+        echo "Failed to restore backup file"
+        exit 1
+      fi
       exit 1
     fi
-    exit 1
+    echo "Updating GRUB settings"
+    update-grub
+    ret=$?
+    if [ $ret -ne 0 ]; then
+      echo -e "Failed to update grub. Script restore backup file.\nPlease update grub manually and run the script again."
+      cp -f $grubBak $grubFile
+      ret=$?
+      if [ $ret -ne 0 ]; then
+        echo "Failed to restore backup file"
+        exit 1
+      fi
+      exit 1
+    fi
   fi
 else
-    echo "Cannot access to the GRUB file."
-    exit 1
-fi
-
-echo "Updating GRUB settings"
-update-grub
-ret=$?
-if [ $ret -ne 0 ]; then
-  echo "Failed to update grub. Please update grub manually and run the script again."
-  cp -f $grubBak $grubFile
-  ret=$?
-  if [ $ret -ne 0 ]; then
-    echo "Failed to restore backup file"
-    exit 1
-  fi
+  echo "Cannot access to the GRUB file."
   exit 1
 fi
 
